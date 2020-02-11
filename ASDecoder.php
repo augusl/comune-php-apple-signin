@@ -6,7 +6,7 @@ use AppleSignIn\Vendor\JWK;
 use AppleSignIn\Vendor\JWT;
 
 use Exception;
-
+use stdClass;
 /**
  * Decode Sign In with Apple identity token, and produce an ASPayload for
  * utilizing in backend auth flows to verify validity of provided user creds.
@@ -23,7 +23,7 @@ class ASDecoder {
      * @param string $identityToken
      * @return object|null
      */
-    public static function getAppleSignInPayload(string $identityToken) : ?object
+    public static function getAppleSignInPayload(string $identityToken) : ?ASPayload
     {
         $identityPayload = self::decodeIdentityToken($identityToken);
         return new ASPayload($identityPayload);
@@ -35,7 +35,7 @@ class ASDecoder {
      * @param string $identityToken
      * @return object
      */
-    public static function decodeIdentityToken(string $identityToken) : object {
+    public static function decodeIdentityToken(string $identityToken) : stdClass {
         $publicKeyData = self::fetchPublicKey();
 
         $publicKey = $publicKeyData['publicKey'];
@@ -82,7 +82,7 @@ class ASDecoder {
 class ASPayload {
     protected $_instance;
 
-    public function __construct(?object $instance) {
+    public function __construct(?stdClass $instance) {
         if(is_null($instance)) {
             throw new Exception('ASPayload received null instance.');
         }
@@ -94,7 +94,7 @@ class ASPayload {
     }
 
     public function __get($key) {
-        return (isset($this->_instance->$key)) ? $this->_instance->$key : null;
+        return $this->_instance->$key;
     }
 
     public function __set($key, $val) {
